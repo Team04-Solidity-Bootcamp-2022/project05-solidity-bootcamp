@@ -16,17 +16,17 @@ contract Lottery is Ownable {
         uint256 amount;
     }
 
-    uint256 public _duration;
     uint256 public _fee;
     uint256 public _targetBlock;
     IMyERC20Token public _tokenContract;
-    uint32 public TOKEN_RATIO = 5;
+    uint8 public TOKEN_RATIO = 5;
+    uint8 public ETH_AVG_BLOCK_TIME = 12;
     Player[] public _userBets;
     uint256 public _totalAmountInBets;
 
     //FIXME: use duration and define target block too
     constructor(uint256 duration, uint256 fee, address tokenAddress) {
-        _duration = duration;
+        _targetBlock = block.number + (duration / ETH_AVG_BLOCK_TIME);
         _fee = fee;
         _tokenContract = IMyERC20Token(tokenAddress);
     }
