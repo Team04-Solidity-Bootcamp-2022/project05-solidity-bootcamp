@@ -3,6 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Random.sol";
 
 interface IMyERC20Token is IERC20 {
     function mint(address to, uint256 amount) external;
@@ -19,16 +20,18 @@ contract Lottery is Ownable {
     uint256 public _fee;
     uint256 public _targetBlock;
     IMyERC20Token public _tokenContract;
+    Random public _randomContract;
     uint8 public TOKEN_RATIO = 5;
     uint8 public ETH_AVG_BLOCK_TIME = 12;
     Player[] public _userBets;
     uint256 public _totalAmountInBets;
 
-    //FIXME: use duration and define target block too
-    constructor(uint256 duration, uint256 fee, address tokenAddress) {
+    constructor(uint256 duration, uint256 fee, address tokenAddress, address randomAddress) {
+        require(duration >= ETH_AVG_BLOCK_TIME, "Duration is too short, try again");
         _targetBlock = block.number + (duration / ETH_AVG_BLOCK_TIME);
         _fee = fee;
         _tokenContract = IMyERC20Token(tokenAddress);
+        _randomContract = Random(randomAddress);
     }
 
     function buyTokens() public payable {
@@ -72,8 +75,14 @@ contract Lottery is Ownable {
             "Tokens were not approved"
         );
         
-        //TODO: Transfer tokens to contract
-        //TODO: Add entry to Player array? 
+        //Transfer tokens to contract
+        _tokenContract.transferFrom(msg.sender, address(this), tokenAmount);
+        
+        //Add entry to Player array?
+        _totalAmountInBets += tokenAmount;
+
+        Player memory p = Player(msg.sender,tokenAmount);
+        _userBets.push(p);
     }
 
     function roll(uint256 amount) public {
