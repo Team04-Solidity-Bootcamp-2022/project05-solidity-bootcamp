@@ -1,101 +1,101 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Random.sol";
-
-interface IMyERC20Token is IERC20 {
-    function mint(address to, uint256 amount) external;
-    function burnFrom(address account, uint256 amount) external;
-}
+import "./LotteryToken.sol";
 
 contract Lottery is Ownable {
-    
-    struct Player {
-        address userAddress;
-        uint256 amount;
+
+    uint256 public betFee;
+    LotteryToken public paymentToken;
+    uint8 public TOKEN_RATIO = 5;
+    uint256 public betPrice;
+    uint256 public betsClosingTime;
+    bool public betsOpen;
+
+    uint256 public prizePool;
+    uint256 public ownerPool;
+
+    mapping(address => uint256) public prize;
+    address[] public slots;
+
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint256 _betFee,
+        uint256 _betPrice) {
+        paymentToken = new LotteryToken(tokenName, tokenSymbol);
+        betFee = _betFee;
+        betPrice = _betPrice;
     }
 
-    uint256 public _fee;
-    uint256 public _targetBlock;
-    IMyERC20Token public _tokenContract;
-    Random public _randomContract;
-    uint8 public TOKEN_RATIO = 5;
-    uint8 public ETH_AVG_BLOCK_TIME = 12;
-    Player[] public _userBets;
-    uint256 public _totalAmountInBets;
+    modifier whenBetsClosed() {
+        require(!betsOpen, "Lottery is open");
+        _;
+    }
 
-    constructor(uint256 duration, uint256 fee, address tokenAddress, address randomAddress) {
-        require(duration >= ETH_AVG_BLOCK_TIME, "Duration is too short, try again");
-        _targetBlock = block.number + (duration / ETH_AVG_BLOCK_TIME);
-        _fee = fee;
-        _tokenContract = IMyERC20Token(tokenAddress);
-        _randomContract = Random(randomAddress);
+    modifier whenBetsOpen() {
+        require(betsOpen && block.timestamp < betsClosingTime ,
+        "Lottery is closed");
+        _;
+    }
+    /// @param closingTime Time in seconds from epoch time that the bets will close
+    function openBets(uint256 closingTime) public onlyOwner whenBetsClosed {
+        require(
+            closingTime > block.timestamp,
+            "Closing time must be in the future"
+        );
+        betsClosingTime = closingTime;
+        betsOpen = true;
     }
 
     function buyTokens() public payable {
         uint256 paymentReceived = msg.value;
         uint256 amountToBeGiven = paymentReceived / TOKEN_RATIO;
-        _tokenContract.mint(msg.sender, amountToBeGiven);
+        paymentToken.mint(msg.sender, amountToBeGiven);
     }
 
-    function burnTokens(uint256 tokenAmount) public {
-        require(
-            _tokenContract.balanceOf(msg.sender) >= tokenAmount,
-            "Not enough tokens"
-        );
-
-        // Check alowance
-        require(
-            _tokenContract.allowance(msg.sender, address(this)) >= tokenAmount,
-            "Tokens were not approved"
-        );
-        // Calculate amount of Ether
-        uint256 etherAmount = tokenAmount * TOKEN_RATIO;
-        // Burn Tokens
-        _tokenContract.burnFrom(msg.sender, tokenAmount);
-
-        // Transfer Ether to user
-        payable(msg.sender).transfer(etherAmount);
-    }
-
-    function bet(uint256 tokenAmount) public {
-        require(block.number < _targetBlock, "Bet must me placed before Target Block");
-        //TODO: Check if user has already betted?
+    function bet() public whenBetsOpen {
         //Check if user has tokens
         require(
-            _tokenContract.balanceOf(msg.sender) >= tokenAmount,
+            paymentToken.balanceOf(msg.sender) >= betFee + betPrice,
             "Not enough tokens"
         );
-
         // Check alowance
         require(
-            _tokenContract.allowance(msg.sender, address(this)) >= tokenAmount,
+            paymentToken.allowance(msg.sender, address(this)) >= betFee + betPrice,
             "Tokens were not approved"
         );
-        
+        ownerPool += betFee;
+        prizePool += betPrice;
+
         //Transfer tokens to contract
-        _tokenContract.transferFrom(msg.sender, address(this), tokenAmount);
-        
-        //Add entry to Player array?
-        _totalAmountInBets += tokenAmount;
-
-        Player memory p = Player(msg.sender,tokenAmount);
-        _userBets.push(p);
+        paymentToken.transferFrom(msg.sender, address(this), betFee + betPrice);
     }
 
-    function roll(uint256 amount) public {
-        require(block.number >= _targetBlock, "Target Block Number not reached yet");
-        // TODO: Generate a random number and make the mod with array size
-        // TODO: Transfer prize - fee;
+    function closeLottery() public whenBetsOpen {
+        require(block.timestamp >= betsClosingTime, "");
+        //TODO: Call random to select winner
+        betsOpen = false;
     }
 
-    function withdraw() public onlyOwner {
+    function claimPrize() public {
 
     }
 
-    function restart() public onlyOwner {
+    function withdrawFees() public onlyOwner {
 
+    }
+
+    function withdrawPrize() public {
+
+    }
+
+    function getRandomNumber()
+        public
+        view
+        returns (uint256 RandomNumber)
+    {
+        RandomNumber  = block.difficulty;   
     }
 }
