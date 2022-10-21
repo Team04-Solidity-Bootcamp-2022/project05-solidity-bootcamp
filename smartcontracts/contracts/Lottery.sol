@@ -71,6 +71,7 @@ contract Lottery is Ownable {
         ownerPool += betFee;
         prizePool += betPrice;
 
+        slots.push(msg.sender);
         //Transfer tokens to contract
         paymentToken.transferFrom(msg.sender, address(this), betFee + betPrice);
     }
