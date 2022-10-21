@@ -2,16 +2,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./LotteryToken.sol";
+import {LotteryToken} from "./LotteryToken.sol";
 
 contract Lottery is Ownable {
 
     uint256 public betFee;
     LotteryToken public paymentToken;
-    uint8 public TOKEN_RATIO = 5;
     uint256 public betPrice;
     uint256 public betsClosingTime;
     bool public betsOpen;
+    uint16 public purchaseRatio;
 
     uint256 public prizePool;
     uint256 public ownerPool;
@@ -22,9 +22,11 @@ contract Lottery is Ownable {
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
+        uint16 _purchaseRatio,
         uint256 _betFee,
         uint256 _betPrice) {
         paymentToken = new LotteryToken(tokenName, tokenSymbol);
+        purchaseRatio = _purchaseRatio;
         betFee = _betFee;
         betPrice = _betPrice;
     }
@@ -51,7 +53,7 @@ contract Lottery is Ownable {
 
     function buyTokens() public payable {
         uint256 paymentReceived = msg.value;
-        uint256 amountToBeGiven = paymentReceived / TOKEN_RATIO;
+        uint256 amountToBeGiven = paymentReceived * purchaseRatio;
         paymentToken.mint(msg.sender, amountToBeGiven);
     }
 
@@ -74,8 +76,15 @@ contract Lottery is Ownable {
     }
 
     function closeLottery() public whenBetsOpen {
-        require(block.timestamp >= betsClosingTime, "");
-        //TODO: Call random to select winner
+        require(block.timestamp >= betsClosingTime, "Too soon to close");
+        require(betsOpen, "Already closed");
+        if (slots.length > 0) {
+            uint256 winnerIndex = getRandomNumber() % slots.length;
+            address winner = slots[winnerIndex];
+            prize[winner] += prizePool;
+            prizePool = 0;
+            delete (slots);
+        }
         betsOpen = false;
     }
 
@@ -83,12 +92,22 @@ contract Lottery is Ownable {
 
     }
 
-    function withdrawFees() public onlyOwner {
-
+    function ownerWithdraw(uint256 amount) public onlyOwner {
+        require(amount <= ownerPool, "Not enough fees collected");
+        ownerPool -= amount;
+        paymentToken.transfer(msg.sender, amount);
     }
 
-    function withdrawPrize() public {
+    function prizeWithdraw(uint256 amount) public {
+        require(amount <= prize[msg.sender], "Not enough prize");
+        prize[msg.sender] -= amount;
+        paymentToken.transfer(msg.sender, amount);
+    }
 
+    /// @notice Burn `amount` tokens and give the equivalent ETH back to user
+    function returnTokens(uint256 amount) public {
+        paymentToken.burnFrom(msg.sender, amount);
+        payable(msg.sender).transfer(amount / purchaseRatio);
     }
 
     function getRandomNumber()
