@@ -75,8 +75,17 @@ contract Lottery is Ownable {
         //Transfer tokens to contract
         paymentToken.transferFrom(msg.sender, address(this), betFee + betPrice);
     }
-
-    function closeLottery() public whenBetsOpen {
+    
+    /// @notice Call the bet function `times` times
+    function betMany(uint256 times) public {
+        require(times > 0);
+        while (times > 0) {
+            bet();
+            times--;
+        }
+    }
+    
+    function closeLottery() public {
         require(block.timestamp >= betsClosingTime, "Too soon to close");
         require(betsOpen, "Already closed");
         if (slots.length > 0) {
@@ -87,10 +96,6 @@ contract Lottery is Ownable {
             delete (slots);
         }
         betsOpen = false;
-    }
-
-    function claimPrize() public {
-
     }
 
     function ownerWithdraw(uint256 amount) public onlyOwner {
