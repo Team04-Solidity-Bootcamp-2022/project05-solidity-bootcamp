@@ -1,0 +1,29 @@
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold">Buy Tokens</h1>
+</div>
+<div class="container">
+  <form [formGroup]="buyTokensForm" (ngSubmit)="buyTokens(buyTokensForm)" class="buyTokensForm">
+    <div class="row">
+      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+        <div class="form-group">
+          <label for="name">Amount:</label>
+            <input class="form-control input-sm" type="text" formControlName="amount" id="amount" placeholder="Amount">
+        </div>
+      </div>
+      <div class="row">
+        <div class="">
+          <div class="form-group">
+              <label for="feedback">Feedback:</label>
+              <input class="form-control input-lg" type="text" formControlName="feedback" id="feedback" placeholder="Feeback will appear here..." readonly>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+          <button type="submit" [disabled]="buyTokensForm.invalid" class="btn btn-primary btn-lg px-4 gap-3" >Buy Tokens</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
