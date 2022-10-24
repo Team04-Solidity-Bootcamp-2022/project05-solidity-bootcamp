@@ -67,12 +67,13 @@ const Home: NextPage = () => {
 
   const chainChanged = () => {
     setAccount('');
+    setBalance(0);
   };
 
   return (
     <>
       {account ? (
-        <Account balance={balance} />
+        <Account balance={balance} account={account} />
       ) : (
         <div className="bg-gray-50">
           <Connect clickHandler={connectWallet} />

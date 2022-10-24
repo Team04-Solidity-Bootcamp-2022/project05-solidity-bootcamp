@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StarIcon } from '@heroicons/react/20/solid';
 import { RadioGroup } from '@headlessui/react';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { env } from 'process';
 
 const product = {
   name: 'My Account',
@@ -28,11 +29,26 @@ function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ');
 }
 
-const Account = ({ balance }: any) => {
+const Account = ({ balance, account }: any) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+
+  const currentAddress = account ? account[0] : '';
+  const ownerAddress =
+    process.env.NEXT_PUBLIC_LOTTERY_CONTRACT_OWNER_ADDRESS || '';
+  const owner = currentAddress.toLowerCase() === ownerAddress.toLowerCase(); //find a way to do this without the env variable
 
   return (
     <div className="bg-white">
+      {!owner && (
+        <span className="m-5 inline-flex items-center rounded-md bg-green-100 px-2.5 py-0.5 text-sm font-medium text-green-800">
+          Lottery Player
+        </span>
+      )}
+      {owner && (
+        <span className="m-5 inline-flex items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
+          Lottery Owner
+        </span>
+      )}
       <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
         <div className="lg:max-w-lg lg:self-end">
           <div className="mt-4">
@@ -48,7 +64,7 @@ const Account = ({ balance }: any) => {
 
             <div className="flex items-center">
               <p className="text-lg text-gray-900 sm:text-xl">{balance} ETH</p>
-
+              {console.log('hey', account)}
               <div className="ml-4 border-l border-gray-300 pl-4">
                 <h2 className="sr-only">Tokens</h2>
                 <div className="flex items-center">
