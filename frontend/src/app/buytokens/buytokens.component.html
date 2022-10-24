@@ -1,0 +1,25 @@
+<div class="px-4 py-5 my-5 text-center">
+  <h1 class="display-5 fw-bold">Buy Tokens</h1>
+  <div class="col-lg-6 mx-auto">
+    <p class="lead mb-4"></p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <div class="">
+        <form [formGroup]="buyTokensForm">
+          <input type="text"
+            placeholder="Enter amount of tokens to buy" 
+            class="form-control"
+            size="50"
+            formControlName="amount">
+        </form>
+        <p class="lead mb-4"></p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <button (click)="buyTokens()" class="btn btn-primary btn-sm px-4 gap-3">Buy tokens</button>
+        </div>
+        <p class="lead mb-4"></p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <button routerLink="/dashboard" class="btn btn-primary btn-sm px-4 gap-3">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

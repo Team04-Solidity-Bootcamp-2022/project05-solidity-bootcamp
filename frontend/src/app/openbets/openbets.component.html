@@ -1,0 +1,32 @@
+<div class="px-4 py-5 my-5 text-center">
+  <h1 class="display-5 fw-bold">Open Bets</h1>
+  <div class="col-lg-6 mx-auto">
+    <p class="lead mb-4"></p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <div class="">
+        <form [formGroup]="openBetsForm">
+          <input type="password"
+            placeholder="Enter the private key of the Lottery Contract" 
+            class="form-control"
+            size="50"
+            formControlName="ownerPrivateKey"
+          >
+          <p class="lead mb-4"></p>
+          <input type="text"
+            placeholder="Duration (in secs)" 
+            class="form-control"
+            size="50"
+            formControlName="duration">
+        </form>
+        <p class="lead mb-4"></p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <button (click)="openBets()" class="btn btn-primary btn-sm px-4 gap-3">Open bets</button>
+        </div>
+        <p class="lead mb-4"></p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <button routerLink="/dashboard" class="btn btn-primary btn-sm px-4 gap-3">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
