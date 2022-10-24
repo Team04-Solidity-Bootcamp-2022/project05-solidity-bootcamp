@@ -19,7 +19,7 @@ export async function getSigner() {
 export async function deployLottery() {
   const BET_PRICE = 1;
   const BET_FEE = 0.2;
-  const TOKEN_RATIO = 1;
+  const TOKEN_RATIO = 500;
 
   const signer = await getSigner();
   const factory = new Lottery__factory(signer);
