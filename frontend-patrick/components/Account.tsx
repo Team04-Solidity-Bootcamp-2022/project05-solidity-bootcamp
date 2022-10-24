@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { StarIcon } from '@heroicons/react/20/solid';
 import { RadioGroup } from '@headlessui/react';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
-import { env } from 'process';
+import Success from '../components/Success';
+import Error from '../components/Error';
+import Loading from '../components/Loading';
+import { ErrorMsg } from '../types';
 
 const product = {
   name: 'My Account',
@@ -19,8 +22,8 @@ const product = {
     { id: 2, name: 'Bags', href: '#' },
   ],
   sizes: [
-    { name: '1 Ticket', description: 'Perfect for a sensible gamblers' },
-    { name: '2 Tickets', description: 'Enough room for a serious gambler.' },
+    { name: '5 Tokens', description: 'Perfect for a sensible gamblers' },
+    { name: '10 Tokens', description: 'Enough room for a serious gambler.' },
   ],
 };
 const reviews = { average: 4, totalCount: 1624 };
@@ -29,7 +32,14 @@ function classNames(...classes: any) {
   return classes.filter(Boolean).join(' ');
 }
 
-const Account = ({ balance, account }: any) => {
+const Account = ({ balance, account, contract }: any) => {
+  const [errorMessage, setErrorMessage] = useState<ErrorMsg>({
+    err: false,
+    msg: '',
+    details: '',
+  });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
 
   const currentAddress = account ? account[0] : '';
@@ -37,8 +47,13 @@ const Account = ({ balance, account }: any) => {
     process.env.NEXT_PUBLIC_LOTTERY_CONTRACT_OWNER_ADDRESS || '';
   const owner = currentAddress.toLowerCase() === ownerAddress.toLowerCase(); //find a way to do this without the env variable
 
+  const buyTokens = () => {
+    console.log(selectedSize);
+  };
+
   return (
     <div className="bg-white">
+      {console.log(contract)}
       {!owner && (
         <span className="m-5 inline-flex items-center rounded-md bg-green-100 px-2.5 py-0.5 text-sm font-medium text-green-800">
           Lottery Player
@@ -116,7 +131,12 @@ const Account = ({ balance, account }: any) => {
               Product options
             </h2>
 
-            <form>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                return false;
+              }}
+            >
               <div className="sm:flex sm:justify-between">
                 {/* Size selector */}
                 <RadioGroup value={selectedSize} onChange={setSelectedSize}>
@@ -172,9 +192,13 @@ const Account = ({ balance, account }: any) => {
                 <button
                   type="submit"
                   className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                  onClick={buyTokens}
                 >
                   Buy tokens
                 </button>
+                {loading && <Loading />}
+                {errorMessage.msg && <Error {...errorMessage} />}
+                {successMessage && <Success msg="What a success"></Success>}
               </div>
               <div className="mt-6 text-center">
                 <a href="#" className="group inline-flex text-base font-medium">

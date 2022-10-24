@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Error from '../components/Error';
 import Connect from '../components/Connect';
 import Account from '../components/Account';
+import abi from '../assets/abi.json';
 
 import { ErrorMsg } from '../types';
 declare let window: any;
@@ -16,6 +17,7 @@ const Home: NextPage = () => {
   });
   const [account, setAccount] = useState('');
   const [balance, setBalance] = useState(0);
+  const [contract, setContract] = useState<any>(null);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -27,13 +29,26 @@ const Home: NextPage = () => {
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        new ethers.providers.Web3Provider(window.ethereum, 'goerli');
+        const provider = new ethers.providers.Web3Provider(
+          window.ethereum,
+          'goerli'
+        );
 
         const res = await window.ethereum.request({
           method: 'eth_requestAccounts',
         });
 
         await accountsChanged(res[0]);
+
+        const signer = provider.getSigner(res[0]);
+
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_LOTTERY_CONTRACT_ADDRESS ?? '',
+          abi.abi,
+          signer
+        );
+
+        setContract(contract);
       } catch (err) {
         console.log(err);
       }
@@ -73,7 +88,7 @@ const Home: NextPage = () => {
   return (
     <>
       {account ? (
-        <Account balance={balance} account={account} />
+        <Account balance={balance} account={account} contract={contract} />
       ) : (
         <div className="bg-gray-50">
           <Connect clickHandler={connectWallet} />
