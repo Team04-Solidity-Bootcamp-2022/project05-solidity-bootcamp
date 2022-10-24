@@ -38,27 +38,15 @@ export class HomeComponent implements OnInit {
 
   loginWithPrivKey() {
     const privateKey = this.loginForm.value.privateKey || "";
-    console.log({ privateKey });
-
+    
     this.apiService.changePrivateKey(privateKey);
     this.apiService.changeProvider(ethers.getDefaultProvider('goerli'));
 
     const wallet = new ethers.Wallet(privateKey, ethers.getDefaultProvider('goerli'));
     this.apiService.changeWallet(wallet);
     this.apiService.changeWalletAddress(wallet.address);
-    // this.provider = ethers.getDefaultProvider('goerli');
-    // this.wallet = new ethers.Wallet(this.privateKey);
-    // this.walletAddress = this.wallet.address;
-
+    
     this.router.navigate(['dashboard']);
-
-
-    // this.provider.getBalance(this.walletAddress).then((balanceBN) => {
-    //   this.balance = ethers.utils.formatEther(balanceBN);
-    // },
-    // (error) => {
-    //   console.log(error);
-    // });
 
   }
 
