@@ -1,0 +1,45 @@
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold">Create New Lottery</h1>
+    
+</div>
+<div class="container">
+  <form [formGroup]="createLotteryForm" (ngSubmit)="createLottery(createLotteryForm)" class="myForm">
+    <div class="row">
+      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+        <div class="form-group">
+          <label for="name">Token Ratio:</label>
+            <input class="form-control input-sm" type="text" formControlName="ratio" id="ratio" placeholder="Ratio">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+          <div class="form-group">
+              <label for="id">Bet Price</label>
+              <input class="form-control input-sm" type="text" formControlName="price" id="price" placeholder="Price">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+          <div class="form-group">
+              <label for="address">Fee:</label>
+              <input class="form-control input-sm" type="text" formControlName="fee" id="fee" placeholder="Fee">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="">
+          <div class="form-group">
+              <label for="feedback">Feedback:</label>
+              <input class="form-control input-lg" type="text" formControlName="feedback" id="feedback" placeholder="Feeback will appear here..." readonly>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+          <button type="submit" [disabled]="createLotteryForm.invalid" class="btn btn-primary btn-lg px-4 gap-3" >CREATE!</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
